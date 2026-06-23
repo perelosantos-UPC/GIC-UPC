@@ -212,8 +212,8 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100
     <div class="kpi" style="--kc:#76e4f7"><div class="kpi-lbl">Majors 65 2023</div><div class="kpi-val" id="d-maj65" style="color:#76e4f7">&#8212;</div><div class="kpi-sub">% poblaci&oacute; &middot; INE</div></div>
     <div class="kpi" style="--kc:#4fd1c5"><div class="kpi-lbl">Edat mitjana 2023</div><div class="kpi-val" id="d-edat" style="color:var(--ac)">&#8212;</div><div class="kpi-sub">anys &middot; INE Padr&oacute;</div></div>
   </div>
-  <!-- Fila 3: Zona 2/5 + Eleccions 2/5 + Participació 1/5 -->
-  <div style="display:grid;grid-template-columns:2fr 2fr 1fr;gap:10px;margin-bottom:12px;">
+  <!-- Fila 3: Zona 2fr + Eleccions 2fr + Piràmide 1fr + Participació 0.7fr -->
+  <div style="display:grid;grid-template-columns:2fr 2fr 1fr 0.7fr;gap:10px;margin-bottom:12px;">
       <div class="card">
         <div class="card-t">Zona educativa</div>
         <div class="zbadge"><div class="zdot" id="d-zdot"></div><span id="d-znom">&#8212;</span></div>
@@ -228,11 +228,19 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100
         <div class="vot-grid" id="d-vot-bars"></div>
         <p class="nota">Valents: local 2023. VOX: des de 2019.</p>
       </div>
-      <div class="card">
-        <div class="card-t">Participaci&oacute; Municipals</div>
-        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;">
-          <span id="d-part23" style="font-family:var(--mono);font-size:28px;font-weight:600;color:var(--ac)">&#8212;</span>
-          <span style="font-size:11px;color:var(--tx2);">% &middot; 2023</span>
+      <div class="card" style="padding:8px;">
+        <div class="card-t" style="margin-bottom:4px;">Pir&agrave;mide 2023</div>
+        <canvas id="cv-piramide" style="width:100%;height:160px;display:block;"></canvas>
+        <div style="display:flex;justify-content:space-between;margin-top:3px;">
+          <span style="font-size:9px;color:#4fd1c5;">◀ H</span>
+          <span style="font-size:9px;color:#f687b3;">D ▶</span>
+        </div>
+      </div>
+      <div class="card" style="padding:8px;">
+        <div class="card-t" style="font-size:9px;">Participaci&oacute;</div>
+        <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px;">
+          <span id="d-part23" style="font-family:var(--mono);font-size:22px;font-weight:600;color:var(--ac)">&#8212;</span>
+          <span style="font-size:9px;color:var(--tx2);">%·23</span>
         </div>
         <div class="cr"><span class="cr-l">2019</span><span class="cr-v" id="d-part19">&#8212;</span></div>
         <div class="cr"><span class="cr-l">2015</span><span class="cr-v" id="d-part15">&#8212;</span></div>
@@ -312,15 +320,9 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100
     </div>
   </div>
   <div style="margin-top:10px;"></div>
-  <div class="g2">
-    <div class="evo-wrap" style="margin-bottom:0;">
-      <div class="evo-t"><span>Comparaci&oacute; IST: secci&oacute; vs zona vs municipi (2023)</span></div>
-      <svg id="sv-zona" class="evo-svg" viewBox="0 0 600 100" style="height:100px;"></svg>
-    </div>
-    <div class="card" style="padding:10px;">
-      <div class="evo-t" style="margin-bottom:6px;"><span>Pir&agrave;mide de poblaci&oacute; 2023</span></div>
-      <canvas id="cv-piramide" style="width:100%;height:180px;"></canvas>
-    </div>
+  <div class="evo-wrap">
+    <div class="evo-t"><span>Comparaci&oacute; IST: secci&oacute; vs zona vs municipi (2023)</span></div>
+    <svg id="sv-zona" class="evo-svg" viewBox="0 0 600 100" style="height:100px;"></svg>
   </div>
 </div>
 
@@ -706,7 +708,7 @@ function update(cusec){
   const el5=document.getElementById("ev-ist-d");if(el5){el5.textContent=di!=null?(di>0?"+":"")+di.toFixed(1)+" pts":"";el5.style.color=di!=null?(di<0?"var(--good)":"var(--bad)"):"var(--tx2)";}
   votBarsSVG(d);
   if(document.getElementById("page-foto").classList.contains("active"))
-    requestAnimationFrame(()=>{initMap(d);drawHist(d.IST_2023);});
+    requestAnimationFrame(()=>{initMap(d);drawHist(d.IST_2023);drawPiramide(d);});
   if(document.getElementById("page-evo").classList.contains("active"))
     requestAnimationFrame(()=>drawEvo(d));
 }
@@ -727,14 +729,14 @@ document.querySelectorAll(".tab").forEach(t=>{
     t.classList.add("active");
     document.getElementById("page-"+t.dataset.tab).classList.add("active");
     const d=DATA.find(x=>x.cusec===sel.value);if(!d)return;
-    if(t.dataset.tab==="foto")requestAnimationFrame(()=>{initMap(d);drawHist(d.IST_2023);});
+    if(t.dataset.tab==="foto")requestAnimationFrame(()=>{initMap(d);drawHist(d.IST_2023);drawPiramide(d);});
     if(t.dataset.tab==="evo")requestAnimationFrame(()=>drawEvo(d));
   });
 });
 
 document.addEventListener("DOMContentLoaded",()=>{
   update("0827902003");
-  requestAnimationFrame(()=>{const d=DATA.find(x=>x.cusec==="0827902003");if(d){initMap(d);drawHist(d.IST_2023);}});
+  requestAnimationFrame(()=>{const d=DATA.find(x=>x.cusec==="0827902003");if(d){initMap(d);drawHist(d.IST_2023);drawPiramide(d);}});
 });
 
 // ===== BUSCADOR PER CARRER =====
